@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forest Fire Weather Index Predictor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg1: #0b0f0c;
+    --bg2: #1a0f0a;
+    --card: rgba(255, 255, 255, 0.06);
+    --border: rgba(255, 255, 255, 0.12);
+    --text: #f3efe9;
+    --muted: #a9a399;
+    --accent: #ff6a2b;
+    --accent2: #ffb43b;
+    --green: #3ddc84;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Poppins', system-ui, sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    background:
+      radial-gradient(900px 500px at 85% -10%, rgba(255,106,43,.25), transparent 60%),
+      radial-gradient(700px 500px at -10% 110%, rgba(61,220,132,.14), transparent 60%),
+      linear-gradient(160deg, var(--bg1), var(--bg2));
+    background-attachment: fixed;
+    padding: 40px 18px 60px;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; }
+
+  header { text-align: center; margin-bottom: 34px; }
+  .flame { font-size: 52px; filter: drop-shadow(0 0 18px rgba(255,106,43,.6)); animation: flicker 2.4s infinite ease-in-out; display: inline-block; }
+  @keyframes flicker { 0%,100% { transform: scale(1) rotate(-2deg); } 50% { transform: scale(1.08) rotate(2deg); } }
+  h1 {
+    font-size: clamp(26px, 5vw, 40px);
+    font-weight: 700;
+    margin-top: 8px;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  header p { color: var(--muted); font-weight: 300; margin-top: 8px; font-size: 15px; }
+
+  form {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 30px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 20px 60px rgba(0,0,0,.45);
+  }
+  .section-title {
+    font-size: 13px; letter-spacing: 1.6px; text-transform: uppercase;
+    color: var(--accent2); font-weight: 600;
+    margin: 6px 0 14px; display: flex; align-items: center; gap: 10px;
+  }
+  .section-title::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+  .section-title:not(:first-child) { margin-top: 28px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+  .field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 7px; }
+  .field label small { color: var(--muted); font-weight: 300; margin-left: 4px; }
+  .field input[type=number] {
+    width: 100%; padding: 13px 14px;
+    background: rgba(0,0,0,.35);
+    border: 1px solid var(--border);
+    border-radius: 12px; color: var(--text);
+    font-family: inherit; font-size: 15px; outline: none;
+    transition: border-color .2s, box-shadow .2s, background .2s;
+  }
+  .field input::placeholder { color: #6f6a62; }
+  .field input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(255,106,43,.22);
+    background: rgba(0,0,0,.5);
+  }
+
+  /* segmented radio toggle */
+  .seg { display: flex; background: rgba(0,0,0,.35); border: 1px solid var(--border); border-radius: 12px; padding: 4px; gap: 4px; }
+  .seg input { display: none; }
+  .seg label {
+    flex: 1; text-align: center; margin: 0; padding: 9px 6px;
+    border-radius: 9px; cursor: pointer; font-size: 14px; color: var(--muted);
+    transition: all .2s;
+  }
+  .seg input:checked + label {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #1a0f0a; font-weight: 600;
+  }
+
+  button {
+    margin-top: 30px; width: 100%;
+    padding: 16px; border: none; border-radius: 14px; cursor: pointer;
+    font-family: inherit; font-size: 16px; font-weight: 600; color: #1a0f0a;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    box-shadow: 0 10px 30px rgba(255,106,43,.35);
+    transition: transform .15s, box-shadow .15s;
+  }
+  button:hover { transform: translateY(-2px); box-shadow: 0 14px 36px rgba(255,106,43,.5); }
+  button:active { transform: translateY(0); }
+
+  /* result */
+  .result {
+    margin-top: 26px; text-align: center; padding: 26px;
+    border-radius: 18px; border: 1px solid var(--border);
+    background: rgba(0,0,0,.35);
+    animation: pop .5s ease;
+  }
+  @keyframes pop { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  .result .label { color: var(--muted); font-size: 13px; letter-spacing: 1.4px; text-transform: uppercase; }
+  .result .value { font-size: 56px; font-weight: 700; line-height: 1.1; margin: 6px 0; }
+  .badge { display: inline-block; padding: 6px 16px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+  .low      .value { color: var(--green); }  .low .badge      { background: rgba(61,220,132,.15); color: var(--green); }
+  .moderate .value { color: var(--accent2);} .moderate .badge { background: rgba(255,180,59,.15); color: var(--accent2); }
+  .high     .value { color: var(--accent); } .high .badge     { background: rgba(255,106,43,.15); color: var(--accent); }
+  .extreme  .value { color: #ff3b3b; }       .extreme .badge  { background: rgba(255,59,59,.15); color: #ff3b3b; }
+
+  footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 26px; font-weight: 300; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="flame">🔥</div>
+    <h1>Forest Fire Weather Index Predictor</h1>
+    <p>Enter the weather and fire-index readings to predict the FWI (Algerian Forest Fires dataset)</p>
+  </header>
+
+  <form action="{{ url_for('predict_datapoint') }}" method="POST">
+
+    <div class="section-title">Weather Conditions</div>
+    <div class="grid">
+      <div class="field">
+        <label for="Temperature">Temperature <small>°C</small></label>
+        <input type="number" step="any" id="Temperature" name="Temperature" placeholder="e.g. 29" required>
+      </div>
+      <div class="field">
+        <label for="RH">Relative Humidity <small>%</small></label>
+        <input type="number" step="any" id="RH" name="RH" placeholder="e.g. 57" required>
+      </div>
+      <div class="field">
+        <label for="Ws">Wind Speed <small>km/h</small></label>
+        <input type="number" step="any" id="Ws" name="Ws" placeholder="e.g. 18" required>
+      </div>
+      <div class="field">
+        <label for="Rain">Rain <small>mm</small></label>
+        <input type="number" step="any" id="Rain" name="Rain" placeholder="e.g. 0.0" required>
+      </div>
+    </div>
+
+    <div class="section-title">Fire Weather Indices</div>
+    <div class="grid">
+      <div class="field">
+        <label for="FFMC">FFMC <small>Fine Fuel Moisture</small></label>
+        <input type="number" step="any" id="FFMC" name="FFMC" placeholder="e.g. 65.7" required>
+      </div>
+      <div class="field">
+        <label for="DMC">DMC <small>Duff Moisture</small></label>
+        <input type="number" step="any" id="DMC" name="DMC" placeholder="e.g. 3.4" required>
+      </div>
+      <div class="field">
+        <label for="ISI">ISI <small>Initial Spread</small></label>
+        <input type="number" step="any" id="ISI" name="ISI" placeholder="e.g. 1.3" required>
+      </div>
+    </div>
+
+    <div class="section-title">Class &amp; Region</div>
+    <div class="grid">
+      <div class="field">
+        <label>Fire Class</label>
+        <div class="seg">
+          <input type="radio" id="cls0" name="Classes" value="0" checked>
+          <label for="cls0">Not Fire</label>
+          <input type="radio" id="cls1" name="Classes" value="1">
+          <label for="cls1">Fire</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>Region</label>
+        <div class="seg">
+          <input type="radio" id="reg0" name="Region" value="0" checked>
+          <label for="reg0">Bejaia</label>
+          <input type="radio" id="reg1" name="Region" value="1">
+          <label for="reg1">Sidi Bel-Abbes</label>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit">Predict FWI 🔥</button>
+
+    {% if results is defined and results is not none %}
+      {% set r = results | float %}
+      {% if r < 5 %}{% set level = 'low' %}{% set txt = 'Low risk' %}
+      {% elif r < 10 %}{% set level = 'moderate' %}{% set txt = 'Moderate risk' %}
+      {% elif r < 20 %}{% set level = 'high' %}{% set txt = 'High risk' %}
+      {% else %}{% set level = 'extreme' %}{% set txt = 'Extreme risk' %}{% endif %}
+      <div class="result {{ level }}">
+        <div class="label">Predicted FWI</div>
+        <div class="value">{{ '%.2f' | format(r) }}</div>
+        <span class="badge">{{ txt }}</span>
+      </div>
+    {% endif %}
+  </form>
+
+  <footer>Built with Flask · Ridge Regression model</footer>
+</div>
+</body>
+</html>
